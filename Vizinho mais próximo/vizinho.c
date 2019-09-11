@@ -44,14 +44,15 @@ void preencheMatrizDistancia(int** matrizCoordenadas, int qtdCidades, int* selec
         }
 }
 
-void trocaPosicoes(Dados dados, int cidade1, int cidade2, int aux)
+int trocaPosicoes(Dados dados, int cidade1, int cidade2)
 {
+    int aux = 0;
     for (i = 0; i < dados.qtdCidades; i++)
     {
         dados.vetSolucao[i] = dados.vetSolucaoStar[i];
     }
     
-    for (i = cidade1, j = cidade2; i < (cidade2/2), j > ((cidade2/2)+1); i++, j--)
+    for (i = cidade1+1, j = cidade2-1; i < (cidade2/2), j > (cidade2/2); i++, j--)
     {
         aux = dados.vetSolucao[i];
         dados.vetSolucao[i] = dados.vetSolucao[j];
@@ -62,21 +63,29 @@ void trocaPosicoes(Dados dados, int cidade1, int cidade2, int aux)
 
     for (i = 0; i < dados.qtdCidades-1; i++)
     {
-        dados.distTotal += dados.matrizDistancia[i][i+1];
+        dados.distTotal += dados.matrizDistancia[dados.vetSolucao[i]][dados.vetSolucao[i+1]];
+        dados.vetSolucaoStar[i] = dados.vetSolucao[i];
     }
+    dados.vetSolucaoStar[dados.qtdCidades-1] = dados.vetSolucao[dados.qtdCidades-1];
     dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
+    return dados.distTotal;
 }
 
-int doisOptFI(Dados dados, int aux, int FOStar){
-    for (i = 0; i < dados.qtdCidades-3; i++)
+int doisOptFI(Dados dados, int FOStar){
+    int distancia, l;
+    for (int k = 0; k < dados.qtdCidades-3; k++)
         {
-            for (j = i+3; j < dados.qtdCidades; j++)
+            l = k+3;
+            while (l < dados.qtdCidades)
             {
-                trocaPosicoes(dados,i+1,j-1,aux);
-                if (dados.distTotal < FOStar)
+                distancia = trocaPosicoes(dados,k,l);
+                if (distancia < FOStar)
                 {
-                    FOStar = dados.distTotal;
+                    FOStar = distancia;
                     return FOStar;
+                } else {
+                    distancia = 0;
+                    l++;
                 }
             } 
         }
@@ -89,15 +98,15 @@ int main(int argc, char *argv[ ])
     FILE *arq;
     FILE *arq2;
     Dados dados;
-    int aux, inicio, x, y, k, distancia, solucaoOtima, c = 0, FOStar = 999999;
+    int aux, inicio, x, y, k, distancia, solucaoOtima, c = 0, FOStar = 999999, FOStarFinal;
     int **matrizCoordenadas;
     int *selecionada;
     clock_t comeco, fim;
     double tempo;
 
     srand(time(NULL));
-    arq = fopen(argv[1], "r"); 
-    arq2 = fopen(argv[2], "r");
+    arq = fopen("Instancias/att48INFO.TXT", "r"); 
+    arq2 = fopen("Instancias/att48.txt", "r");
 
     if (arq == NULL || arq2 == NULL)
     {
@@ -165,16 +174,22 @@ int main(int argc, char *argv[ ])
             dados.distTotal = 0;
         }
 
-        FOStar = doisOptFI(dados,aux,FOStar);
+        FOStarFinal = doisOptFI(dados,FOStar);
         
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
     }
     printf("***********************************************************************\n");
     printf("Arquivo: %s\n", argv[2]);
-    printf("Solucao encontrada: %d\n", FOStar);
+    printf("Solucao encontrada: %d\n", FOStarFinal);
     printf("Solucao Otima: %d \n", solucaoOtima);
     printf("Tempo: %f\n", tempo);
+    for(i = 0; i < dados.qtdCidades; i++)
+    {
+        printf("%d ", dados.vetSolucaoStar[i]);
+    }
+    printf("\n");
+    
 
     fclose(arq);
     fclose(arq2);
