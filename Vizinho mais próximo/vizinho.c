@@ -51,20 +51,19 @@ int trocaPosicoes(Dados dados, int cidade1, int cidade2)
     {
         dados.vetSolucao[i] = dados.vetSolucaoStar[i];
     }
-    
-    for (i = cidade1+1, j = cidade2-1; i < (cidade2/2), j > (cidade2/2); i++, j--)
+
+    for (i = cidade1+1, j = cidade2-1; i <= (cidade2/2) && j > (cidade2/2); i++, j--)
     {
+
         aux = dados.vetSolucao[i];
         dados.vetSolucao[i] = dados.vetSolucao[j];
         dados.vetSolucao[j] = aux;
     }
-    
     dados.distTotal = 0;
 
     for (i = 0; i < dados.qtdCidades-1; i++)
     {
         dados.distTotal += dados.matrizDistancia[dados.vetSolucao[i]][dados.vetSolucao[i+1]];
-        dados.vetSolucaoStar[i] = dados.vetSolucao[i];
     }
     dados.vetSolucaoStar[dados.qtdCidades-1] = dados.vetSolucao[dados.qtdCidades-1];
     dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
@@ -82,12 +81,16 @@ int doisOptFI(Dados dados, int FOStar){
                 if (distancia < FOStar)
                 {
                     FOStar = distancia;
+                    for (i = 0; i < dados.qtdCidades-1; i++)
+                    {
+                      dados.vetSolucaoStar[i] = dados.vetSolucao[i];
+                    }
                     return FOStar;
                 } else {
                     distancia = 0;
                     l++;
                 }
-            } 
+            }
         }
         return FOStar;
 }
@@ -105,7 +108,7 @@ int main(int argc, char *argv[ ])
     double tempo;
 
     srand(time(NULL));
-    arq = fopen("Instancias/att48INFO.TXT", "r"); 
+    arq = fopen("Instancias/att48INFO.TXT", "r");
     arq2 = fopen("Instancias/att48.txt", "r");
 
     if (arq == NULL || arq2 == NULL)
@@ -175,7 +178,7 @@ int main(int argc, char *argv[ ])
         }
 
         FOStarFinal = doisOptFI(dados,FOStar);
-        
+
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
     }
@@ -189,7 +192,7 @@ int main(int argc, char *argv[ ])
         printf("%d ", dados.vetSolucaoStar[i]);
     }
     printf("\n");
-    
+
 
     fclose(arq);
     fclose(arq2);
