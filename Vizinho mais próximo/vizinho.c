@@ -15,6 +15,7 @@ typedef struct
 } Dados;
 
 int i,j;
+bool melhora = true;
 
 void lerCoordenadas(int** matrizCoordenadas, int qtdCidades, FILE* arq2, int aux){
     for (i = 0; i < qtdCidades; i++)
@@ -85,10 +86,12 @@ int doisOptFI(Dados dados, int FOStar){
                     dados.vetSolucaoStar[i] = dados.vetSolucao[i];
                 }
                 dados.vetSolucaoStar[dados.qtdCidades-1] = dados.vetSolucao[dados.qtdCidades-1];
+                melhora = true;
                 return FOStar;
             } else {
                 distancia = 0;
                 l++;
+                melhora = false;
             }
         }
     }
@@ -96,7 +99,8 @@ int doisOptFI(Dados dados, int FOStar){
 }
 // 2-opt Best Improvement
 int doisOptBI(Dados dados, int FOStar){
-    int distancia, l;
+    int distancia, l, distInicial = FOStar;
+
     for (int k = 0; k < dados.qtdCidades-3; k++)
     {
         l = k+3;
@@ -111,14 +115,19 @@ int doisOptBI(Dados dados, int FOStar){
                     dados.vetSolucaoStar[i] = dados.vetSolucao[i];
                 }
                 dados.vetSolucaoStar[dados.qtdCidades-1] = dados.vetSolucao[dados.qtdCidades-1];
-                distancia = 0;
-                l++;
-            } else {
-                distancia = 0;
-                l++;
             }
+
+            distancia = 0;
+            l++;
         }
     }
+    if (distInicial > FOStar)
+    {
+        melhora = true;
+    } else {
+        melhora = false;
+    }
+    
     return FOStar;
 }
 
@@ -128,7 +137,7 @@ int main(int argc, char *argv[ ])
     FILE *arq;
     FILE *arq2;
     Dados dados;
-    int aux, inicio, x, y, k, distancia, solucaoOtima, c = 0, FOStar = 999999, FOStarFinal;
+    int aux, inicio, x, y, k, distancia, solucaoOtima, c = 0, FOStar = 999999, FOStarFinal = 0;
     int **matrizCoordenadas;
     int *selecionada;
     clock_t comeco, fim;
@@ -204,9 +213,12 @@ int main(int argc, char *argv[ ])
             dados.distTotal = 0;
         }
 
-        // chama a função que vai melhorar o resultado (2-opt)
-        FOStarFinal = doisOptBI(dados,FOStar);
-
+        while (melhora)
+        {
+            // chama a função que vai melhorar o resultado (2-opt)
+            FOStarFinal = doisOptBI(dados,FOStar);
+        }
+            
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
     }
