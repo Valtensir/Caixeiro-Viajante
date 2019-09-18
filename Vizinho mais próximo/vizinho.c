@@ -145,8 +145,8 @@ float doisOptFirst(Dados dados, float FOStar){
 
 float orOptFirst (Dados dados, float FOStar){
     int *solucaoAtual = (int *)malloc(dados.qtdCidades * sizeof(int));
-    float FOvizinho, FOatual = FOStar, FOmelhorvizinho = FOStar;
-    int melhoria = 0, retirada, inserida;
+    float FOvizinho = 0, FOatual = FOStar, FOmelhorvizinho = FOStar;
+    int melhoria = 0, retirada, inserida, ref1, ref2, aux;
     for (i = 0; i < dados.qtdCidades; i++)
     {
         solucaoAtual[i] = dados.vetSolucaoStar[i]; //salvando melhor vizinho
@@ -159,11 +159,98 @@ float orOptFirst (Dados dados, float FOStar){
         {
             for (int j = i+1; j < dados.qtdCidades; ++j)
             {
-                retirada = dados.matrizDistancia[solucaoAtual[i]][solucaoAtual[i-1]] + dados.matrizDistancia[solucaoAtual[j]][solucaoAtual[j+1]];
+                aux = solucaoAtual[i];
+                solucaoAtual[i] = solucaoAtual[j];
+                solucaoAtual[j] = aux;
+
+                for (int k = 0; k < dados.qtdCidades - 1; k++)
+                {
+                    FOvizinho += dados.matrizDistancia[solucaoAtual[k]][solucaoAtual[k+1]];
+                }
+
+                FOvizinho += dados.matrizDistancia[solucaoAtual[0]][solucaoAtual[dados.qtdCidades-1]];
+                
+
+                if(FOvizinho < FOmelhorvizinho)
+                {
+                        melhoria = 0;
+                        FOmelhorvizinho = FOvizinho;
+                        i = dados.qtdCidades;
+                        j = dados.qtdCidades;
+                } else {
+                        aux = solucaoAtual[i];
+                        solucaoAtual[i] = solucaoAtual[j];
+                        solucaoAtual[j] = aux;
+                }
+                FOvizinho = 0;
             }
+        }
+        if(melhoria == 0)
+        {
+            FOatual = FOmelhorvizinho;
         }
     }
 
+    FOStar = FOatual;
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        dados.vetSolucaoStar[i] = solucaoAtual[i];
+    }
+    return FOStar;
+}
+
+float orOptBest (Dados dados, float FOStar){
+    int *solucaoAtual = (int *)malloc(dados.qtdCidades * sizeof(int));
+    float FOvizinho = 0, FOatual = FOStar, FOmelhorvizinho = FOStar;
+    int melhoria = 0, retirada, inserida, ref1, ref2, aux;
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        solucaoAtual[i] = dados.vetSolucaoStar[i]; //salvando melhor vizinho
+    }
+
+    while(melhoria == 0)
+    {
+        melhoria = 1;
+        for (int i = 1; i < dados.qtdCidades-1; ++i)
+        {
+            for (int j = i+1; j < dados.qtdCidades; ++j)
+            {
+                aux = solucaoAtual[i];
+                solucaoAtual[i] = solucaoAtual[j];
+                solucaoAtual[j] = aux;
+
+                for (int k = 0; k < dados.qtdCidades - 1; k++)
+                {
+                    FOvizinho += dados.matrizDistancia[solucaoAtual[k]][solucaoAtual[k+1]];
+                }
+
+                FOvizinho += dados.matrizDistancia[solucaoAtual[0]][solucaoAtual[dados.qtdCidades-1]];
+                
+
+                if(FOvizinho < FOmelhorvizinho)
+                {
+                        melhoria = 0;
+                        FOmelhorvizinho = FOvizinho;
+                } else {
+                        aux = solucaoAtual[i];
+                        solucaoAtual[i] = solucaoAtual[j];
+                        solucaoAtual[j] = aux;
+                }
+                FOvizinho = 0;
+            }
+        }
+        if(melhoria == 0)
+        {
+            FOatual = FOmelhorvizinho;
+        }
+    }
+
+    FOStar = FOatual;
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        dados.vetSolucaoStar[i] = solucaoAtual[i];
+    }
+    return FOStar;
 }
 
 int main(int argc, char *argv[ ])
@@ -206,7 +293,7 @@ int main(int argc, char *argv[ ])
 
         comeco = clock();
         // for que percorre todas as cidades em busca da melhor solução
-        for (int l = 0; l < dados.qtdCidades;l++){//dados.qtdCidades; l++){
+        for (int l = 0; l < dados.qtdCidades;l++){
             inicio = l;
             dados.vetSolucao[0] = inicio;
             selecionada[inicio] = 1;
@@ -249,9 +336,13 @@ int main(int argc, char *argv[ ])
             dados.distTotal = 0;
         }
 
-        //FOStar = doisOptFirst(dados,  FOStar);
+        FOStar = doisOptFirst(dados,  FOStar);
 
-        FOStar = doisOptBest(dados,  FOStar);
+        //FOStar = doisOptBest(dados,  FOStar);
+
+        //FOStar = orOptFirst(dados,FOStar);
+
+        //FOStar = orOptBest(dados,FOStar);
 
 
         fim = clock();

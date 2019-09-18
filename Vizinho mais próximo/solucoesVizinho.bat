@@ -19,3 +19,4 @@ vizinho.exe Instancias/pr152INFO.TXT Instancias/pr152.txt
 vizinho.exe Instancias/pr76INFO.TXT Instancias/pr76.txt
 vizinho.exe Instancias/rat195INFO.TXT Instancias/rat195.txt
 vizinho.exe Instancias/rat99INFO.TXT Instancias/rat99.txt
+vizinho.exe Instancias/st70INFO.TXT Instancias/st70.txt
