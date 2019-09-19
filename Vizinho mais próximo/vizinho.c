@@ -122,7 +122,7 @@ float doisOptFirst(Dados dados, float FOStar){
                 }
             }
 
-            if(melhoria==0){
+            if(melhoria == 0){
                 int aux2 = 0;
                 int n_trocas = ceil((ref2-ref1)/2);
                 for(int aux2=0; aux2<=n_trocas;aux2++){
@@ -169,7 +169,7 @@ float orOptFirst (Dados dados, float FOStar){
                 }
 
                 FOvizinho += dados.matrizDistancia[solucaoAtual[0]][solucaoAtual[dados.qtdCidades-1]];
-                
+
 
                 if(FOvizinho < FOmelhorvizinho)
                 {
@@ -225,7 +225,7 @@ float orOptBest (Dados dados, float FOStar){
                 }
 
                 FOvizinho += dados.matrizDistancia[solucaoAtual[0]][solucaoAtual[dados.qtdCidades-1]];
-                
+
 
                 if(FOvizinho < FOmelhorvizinho)
                 {
@@ -260,7 +260,8 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999;
+    int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *selecionada;
     clock_t comeco, fim;
@@ -285,6 +286,7 @@ int main(int argc, char *argv[ ])
         dados.vetSolucao = (int *)malloc(dados.qtdCidades * sizeof(int));
         selecionada = (int *)malloc(dados.qtdCidades * sizeof(int));
         dados.vetSolucaoStar = (int *)malloc(dados.qtdCidades * sizeof(int));
+        melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
         dados.distTotal = 0;
 
         // lê as coordenadas e preenche a matriz de distância entre as cidades
@@ -319,14 +321,14 @@ int main(int argc, char *argv[ ])
             // distancia entre a última e a primeira cidade
             dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
 
-            if (dados.distTotal < FOStar)
-            {
+           // if (dados.distTotal < FOStar)
+            //{
                 FOStar = dados.distTotal;
                 for (i = 0; i < dados.qtdCidades; i++)
                 {
                     dados.vetSolucaoStar[i] = dados.vetSolucao[i];
                 }
-            }
+            //}
 
             for (i = 0; i < dados.qtdCidades; i++)
             {
@@ -334,9 +336,20 @@ int main(int argc, char *argv[ ])
                 dados.vetSolucao[i] = 0;
             }
             dados.distTotal = 0;
+
+            FOStar = doisOptBest(dados,  FOStar);
+
+            if(FOStar < FOStarMulti)
+            {
+                FOStarMulti = FOStar;
+                for(i = 0; i < dados.qtdCidades; i++)
+                {
+                    melhorSolucaoMulti[i] = dados.vetSolucaoStar[i];
+                }
+            }
         }
 
-        FOStar = doisOptFirst(dados,  FOStar);
+        //FOStar = doisOptFirst(dados,  FOStar);
 
         //FOStar = doisOptBest(dados,  FOStar);
 
@@ -350,8 +363,9 @@ int main(int argc, char *argv[ ])
     }
     printf("***********************************************************************\n");
     printf("Arquivo: %s\n", argv[2]);
-    printf("Solucao encontrada: %f\n", FOStar);
+    printf("Solucao encontrada: %f\n", FOStarMulti);
     printf("Solucao Otima: %f \n", solucaoOtima);
+    printf("GAP: %f \n", (100*(FOStarMulti-solucaoOtima)/solucaoOtima));
     printf("Tempo: %f\n", tempo);
 
     fclose(arq);
