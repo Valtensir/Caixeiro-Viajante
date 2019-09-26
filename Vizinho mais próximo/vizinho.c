@@ -43,6 +43,57 @@ void preencheMatrizDistancia(int** matrizCoordenadas, int qtdCidades, int* selec
         }
 }
 
+float vizinhoMaisProximo(int inicio, int l, Dados dados, int* selecionada, float FOStar, float alfa){
+    int distancia, k, aux, distanciaMaior = -1;
+    int* candidatos;
+    inicio = l;
+    dados.vetSolucao[0] = inicio;
+    selecionada[inicio] = 1;
+
+    melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
+
+    // faz a busca pela solução atráves do vizinho mais próximo
+    k = 0;
+    for (i = 0; i < dados.qtdCidades - 1; i++)
+    {
+        distancia = 1000000;
+        for (j = 0; j < dados.qtdCidades; j++)
+        {
+            if (dados.matrizDistancia[dados.vetSolucao[k]][j] < distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
+            {
+                distancia = dados.matrizDistancia[dados.vetSolucao[k]][j];
+                dados.vetSolucao[k + 1] = j;
+                aux = j;
+            } else if (dados.matrizDistancia[dados.vetSolucao[k]][j] > distancia && dados.vetSolucao[k] != j)
+            {
+                distanciaMaior = dados.matrizDistancia[dados.vetSolucao[k]][j];
+
+            }
+        }
+        dados.distTotal += distancia;
+        selecionada[aux] = 1;
+        k++;
+    }
+
+    // distancia entre a última e a primeira cidade
+    dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
+
+    FOStar = dados.distTotal;
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        dados.vetSolucaoStar[i] = dados.vetSolucao[i];
+    }
+
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        selecionada[i] = 0;
+        dados.vetSolucao[i] = 0;
+    }
+    dados.distTotal = 0;
+
+    return FOStar;
+}
+
 float doisOptBest(Dados dados, float FOStar){
         //2opt - bestimprovements
         int *solucaoAtual = (int *)malloc(dados.qtdCidades * sizeof(int));
@@ -260,7 +311,7 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.2;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *selecionada;
@@ -296,46 +347,8 @@ int main(int argc, char *argv[ ])
         comeco = clock();
         // for que percorre todas as cidades em busca da melhor solução
         for (int l = 0; l < dados.qtdCidades;l++){
-            inicio = l;
-            dados.vetSolucao[0] = inicio;
-            selecionada[inicio] = 1;
 
-            // faz a busca pela solução atráves do vizinho mais próximo
-            k = 0;
-            for (i = 0; i < dados.qtdCidades - 1; i++)
-            {
-                distancia = 1000000;
-                for (j = 0; j < dados.qtdCidades; j++)
-                {
-                    if (dados.matrizDistancia[dados.vetSolucao[k]][j] < distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
-                        {
-                            distancia = dados.matrizDistancia[dados.vetSolucao[k]][j];
-                            dados.vetSolucao[k + 1] = j;
-                            aux = j;
-                        }
-                }
-                dados.distTotal += distancia;
-                selecionada[aux] = 1;
-                k++;
-            }
-            // distancia entre a última e a primeira cidade
-            dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
-
-           // if (dados.distTotal < FOStar)
-            //{
-                FOStar = dados.distTotal;
-                for (i = 0; i < dados.qtdCidades; i++)
-                {
-                    dados.vetSolucaoStar[i] = dados.vetSolucao[i];
-                }
-            //}
-
-            for (i = 0; i < dados.qtdCidades; i++)
-            {
-                selecionada[i] = 0;
-                dados.vetSolucao[i] = 0;
-            }
-            dados.distTotal = 0;
+            FOStar = vizinhoMaisProximo(inicio,l,dados,selecionada,FOStar,alfa);
 
             FOStar = doisOptBest(dados,  FOStar);
 
