@@ -90,13 +90,16 @@ float vizinhoMaisProximo(int inicio, int l, Dados dados, int* selecionada, float
 }
 
 float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOStar, float alfa){
-    int distancia, k, aux, distanciaMaior = -1;
+    int distancia, k, aux, distanciaMaior = -1, aux2, index = 1, escolhido;
     int* candidatos;
     inicio = l;
     dados.vetSolucao[0] = inicio;
     selecionada[inicio] = 1;
 
+    srand(time(NULL));
+
     melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
+    candidatos = (int *)malloc(dados.qtdCidades * sizeof(int));
 
     // faz a busca pela solução atráves do vizinho mais próximo
     k = 0;
@@ -110,12 +113,26 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
                 distancia = dados.matrizDistancia[dados.vetSolucao[k]][j];
                 dados.vetSolucao[k + 1] = j;
                 aux = j;
-            } else if (dados.matrizDistancia[dados.vetSolucao[k]][j] > distancia && dados.vetSolucao[k] != j)
+            } else if (dados.matrizDistancia[dados.vetSolucao[k]][j] > distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
             {
                 distanciaMaior = dados.matrizDistancia[dados.vetSolucao[k]][j];
-
+                aux2 = j;
             }
         }
+
+        candidatos[0] = aux;
+
+        for (j = 0; j < dados.qtdCidades; ++j)
+        {
+            if ((distancia + alfa*(distanciaMaior - distancia)) > dados.matrizDistancia[dados.vetSolucao[k]][j] && selecionada[j] == 0)
+            {
+                candidatos[index] = j;
+                index++;
+            }
+        }
+
+        escolhido = rand() % index;
+
         dados.distTotal += distancia;
         selecionada[aux] = 1;
         k++;
