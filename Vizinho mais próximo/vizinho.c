@@ -43,7 +43,53 @@ void preencheMatrizDistancia(int** matrizCoordenadas, int qtdCidades, int* selec
         }
 }
 
-float vizinhoMaisProximo(int inicio, int l, Dados dados, int* selecionada, float FOStar, float alfa){
+float vizinhoMaisProximo(int inicio, int l, Dados dados, int* selecionada, float FOStar){
+    int distancia, k, aux;
+    inicio = l;
+    dados.vetSolucao[0] = inicio;
+    selecionada[inicio] = 1;
+
+    melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
+
+    // faz a busca pela solução atráves do vizinho mais próximo
+    k = 0;
+    for (i = 0; i < dados.qtdCidades - 1; i++)
+    {
+        distancia = 1000000;
+        for (j = 0; j < dados.qtdCidades; j++)
+        {
+            if (dados.matrizDistancia[dados.vetSolucao[k]][j] < distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
+            {
+                distancia = dados.matrizDistancia[dados.vetSolucao[k]][j];
+                dados.vetSolucao[k + 1] = j;
+                aux = j;
+            }
+        }
+        dados.distTotal += distancia;
+        selecionada[aux] = 1;
+        k++;
+    }
+
+    // distancia entre a última e a primeira cidade
+    dados.distTotal += dados.matrizDistancia[dados.vetSolucao[0]][dados.vetSolucao[dados.qtdCidades-1]];
+
+    FOStar = dados.distTotal;
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        dados.vetSolucaoStar[i] = dados.vetSolucao[i];
+    }
+
+    for (i = 0; i < dados.qtdCidades; i++)
+    {
+        selecionada[i] = 0;
+        dados.vetSolucao[i] = 0;
+    }
+    dados.distTotal = 0;
+
+    return FOStar;
+}
+
+float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOStar, float alfa){
     int distancia, k, aux, distanciaMaior = -1;
     int* candidatos;
     inicio = l;
