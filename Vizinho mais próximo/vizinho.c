@@ -49,8 +49,6 @@ float vizinhoMaisProximo(int inicio, int l, Dados dados, int* selecionada, float
     dados.vetSolucao[0] = inicio;
     selecionada[inicio] = 1;
 
-    melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
-
     // faz a busca pela solução atráves do vizinho mais próximo
     k = 0;
     for (i = 0; i < dados.qtdCidades - 1; i++)
@@ -98,7 +96,6 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
 
     srand(time(NULL));
 
-    melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
     candidatos = (int *)malloc(dados.qtdCidades * sizeof(int));
 
     // faz a busca pela solução atráves do vizinho mais próximo
@@ -111,9 +108,8 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
             if (dados.matrizDistancia[dados.vetSolucao[k]][j] < distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
             {
                 distancia = dados.matrizDistancia[dados.vetSolucao[k]][j];
-                dados.vetSolucao[k + 1] = j;
                 aux = j;
-            } else if (dados.matrizDistancia[dados.vetSolucao[k]][j] > distancia && dados.vetSolucao[k] != j && selecionada[j] == 0)
+            } else if (dados.matrizDistancia[dados.vetSolucao[k]][j] > distanciaMaior && dados.vetSolucao[k] != j && selecionada[j] == 0)
             {
                 distanciaMaior = dados.matrizDistancia[dados.vetSolucao[k]][j];
                 aux2 = j;
@@ -133,9 +129,15 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
 
         escolhido = rand() % index;
 
-        dados.distTotal += distancia;
-        selecionada[aux] = 1;
+        dados.distTotal += dados.matrizDistancia[k][candidatos[escolhido]];
+        dados.vetSolucao[k+1] = candidatos[escolhido];
+        selecionada[candidatos[escolhido]] = 1;
         k++;
+        for (j = 0; j < dados.qtdCidades; j++)
+        {
+            candidatos[j] = 0;
+        }
+        index = 0;
     }
 
     // distancia entre a última e a primeira cidade
@@ -411,9 +413,9 @@ int main(int argc, char *argv[ ])
         // for que percorre todas as cidades em busca da melhor solução
         for (int l = 0; l < dados.qtdCidades;l++){
 
-            FOStar = vizinhoMaisProximo(inicio,l,dados,selecionada,FOStar,alfa);
+            FOStar = vizinhoGRASP(inicio,l,dados,selecionada,FOStar,alfa);
 
-            FOStar = doisOptBest(dados,  FOStar);
+            FOStar = doisOptBest(dados,FOStar);
 
             if(FOStar < FOStarMulti)
             {
@@ -425,15 +427,6 @@ int main(int argc, char *argv[ ])
             }
         }
 
-        //FOStar = doisOptFirst(dados,  FOStar);
-
-        //FOStar = doisOptBest(dados,  FOStar);
-
-        //FOStar = orOptFirst(dados,FOStar);
-
-        //FOStar = orOptBest(dados,FOStar);
-
-
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
     }
@@ -443,7 +436,7 @@ int main(int argc, char *argv[ ])
     printf("Solucao Otima: %f \n", solucaoOtima);
     printf("GAP: %f \n", (100*(FOStarMulti-solucaoOtima)/solucaoOtima));
     printf("Tempo: %f\n", tempo);
-
+    
     fclose(arq);
     fclose(arq2);
     free(matrizCoordenadas);
