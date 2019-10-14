@@ -123,6 +123,13 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
 
         candidatos[0] = aux;
 
+        distanciaMaior /= 4;
+
+        if (distanciaMaior < distancia)
+        {
+            distanciaMaior *= 4;
+        }
+
         for (j = 0; j < dados.qtdCidades; ++j)
         {
             if ((distancia + alfa*(distanciaMaior - distancia)) > dados.matrizDistancia[dados.vetSolucao[k]][j] && selecionada[j] == 0 && j != aux)
@@ -132,7 +139,7 @@ float vizinhoGRASP(int inicio, int l, Dados dados, int* selecionada, float FOSta
             }
         }
 
-        escolhido = 0;
+        escolhido = rand() % index;
 
         dados.distTotal += dados.matrizDistancia[dados.vetSolucao[k]][candidatos[escolhido]];
         dados.vetSolucao[k+1] = candidatos[escolhido];
@@ -375,22 +382,46 @@ float orOptBest (Dados dados, float FOStar){
     return FOStar;
 }
 
+void perturbacao(int* solucaoUm)
+{
+    int num1, num2, aux;
+    srand(time(NULL));
+
+    num1 = rand() % dados.qtdCidades;
+
+    do {
+        num2 = rand() % dados.qtdCidades;
+    } while(num1 == num2);
+
+    for (i = 0; i < dados.qtdCidades; ++i)
+    {
+        solucaoUm[i] = dados.vetSolucaoStar[i];  
+    }
+
+    aux = solucaoUm[num1];
+    solucaoUm[num1] = solucaoUm[num2];
+    solucaoUm[num2] = aux;
+
+}
+
 int main(int argc, char *argv[ ])
 {
 
     FILE *arq;
     FILE *arq2;
     Dados dados;
-    int aux, inicio,  k, c = 0;
+    int aux, inicio,  k, c = 0, iter = 0;
     float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.2;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
+    int *solucaoUm;
+    int *solucaoDois;
     int *selecionada;
     clock_t comeco, fim;
     double tempo;
 
-    arq = fopen("Instancias/berlin10INFO.TXT", "r");
-    arq2 = fopen("Instancias/berlin10.txt", "r");
+    arq = fopen(argv[1], "r");
+    arq2 = fopen(argv[2], "r");
 
     if (arq == NULL || arq2 == NULL)
     {
@@ -408,6 +439,8 @@ int main(int argc, char *argv[ ])
         selecionada = (int *)malloc(dados.qtdCidades * sizeof(int));
         dados.vetSolucaoStar = (int *)malloc(dados.qtdCidades * sizeof(int));
         melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
+        solucaoUm = (int *)malloc(dados.qtdCidades * sizeof(int));
+        solucaoDois = (int *)malloc(dados.qtdCidades * sizeof(int));
         dados.distTotal = 0;
 
         // lê as coordenadas e preenche a matriz de distância entre as cidades
@@ -418,9 +451,19 @@ int main(int argc, char *argv[ ])
         // for que percorre todas as cidades em busca da melhor solução
         for (int l = 0; l < dados.qtdCidades; l++){
 
-            FOStar = vizinhoMaisProximo(inicio,l,dados,selecionada,FOStar);
+            FOStar = vizinhoGRASP(inicio,l,dados,selecionada,FOStar,alfa);
 
-            //FOStar = doisOptBest(dados,FOStar);
+            FOStar = 0;
+
+            for (int i = 0; i < dados.qtdCidades - 1; ++i)
+            {
+                FOStar += dados.matrizDistancia[dados.vetSolucaoStar[i]][dados.vetSolucaoStar[i+1]];
+            }
+
+            FOStar += dados.matrizDistancia[dados.vetSolucaoStar[0]][dados.vetSolucaoStar[dados.qtdCidades-1]];
+
+            FOStar = doisOptBest(dados,FOStar);
+            //FOStar = orOptBest(dados,FOStar);
 
             if(FOStar < FOStarMulti)
             {
@@ -430,8 +473,24 @@ int main(int argc, char *argv[ ])
                     melhorSolucaoMulti[i] = dados.vetSolucaoStar[i];
                 }
             }
+
+            while(iter < 10)
+            {
+                perturbacao(solucaoUm);
+                FOStarMulti = ()
+            }
+
         }
 
+        /*FOStarMulti = 0;
+
+        for (int i = 0; i < dados.qtdCidades - 1; ++i)
+        {
+            FOStarMulti += dados.matrizDistancia[melhorSolucaoMulti[i]][melhorSolucaoMulti[i+1]];
+        }
+
+        FOStarMulti += dados.matrizDistancia[melhorSolucaoMulti[0]][melhorSolucaoMulti[dados.qtdCidades-1]];*/
+       
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
     }
@@ -441,10 +500,7 @@ int main(int argc, char *argv[ ])
     printf("Solucao Otima: %f \n", solucaoOtima);
     printf("GAP: %f \n", (100*(FOStarMulti-solucaoOtima)/solucaoOtima));
     printf("Tempo: %f\n", tempo);
-    for(int k = 0; k < dados.qtdCidades; k++){
-        printf("%d ", dados.vetSolucaoStar[k]);
-    }
-
+    
     fclose(arq);
     fclose(arq2);
     free(matrizCoordenadas);
