@@ -315,7 +315,7 @@ float orOptFirst (Dados dados, float FOStar){
             }
         }
         if(melhoria == 0)
-        {https://github.com/Valtensir/Caixeiro-Viajante.git
+        {
             FOatual = FOmelhorvizinho;
         }
     }
@@ -382,9 +382,9 @@ float orOptBest (Dados dados, float FOStar){
     return FOStar;
 }
 
-void perturbacao(int* solucaoUm)
+int perturbacao(Dados dados)
 {
-    int num1, num2, aux;
+    int num1, num2, aux, FOPerturbacao = 0;
     srand(time(NULL));
 
     num1 = rand() % dados.qtdCidades;
@@ -393,15 +393,32 @@ void perturbacao(int* solucaoUm)
         num2 = rand() % dados.qtdCidades;
     } while(num1 == num2);
 
-    for (i = 0; i < dados.qtdCidades; ++i)
+    aux = dados.vetSolucaoStar[num1];
+    dados.vetSolucaoStar[num1] = dados.vetSolucaoStar[num2];
+    dados.vetSolucaoStar[num2] = aux;
+
+    for (int i = 0; i < dados.qtdCidades - 1; ++i)
     {
-        solucaoUm[i] = dados.vetSolucaoStar[i];  
+        FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[i]][dados.vetSolucaoStar[i+1]];
+    }
+    FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[0]][dados.vetSolucaoStar[dados.qtdCidades-1]];
+
+    return FOPerturbacao;
+}
+
+int criterioAceitacao(int FOdeS,int FOPerturbacao, int FOBuscaLocal)
+{
+    if (FOdeS < FOBuscaLocal)
+    {
+        FOBuscaLocal = FOdeS;
     }
 
-    aux = solucaoUm[num1];
-    solucaoUm[num1] = solucaoUm[num2];
-    solucaoUm[num2] = aux;
+    if (FOPerturbacao < FOBuscaLocal)
+    {
+        FOBuscaLocal = FOPerturbacao;
+    }
 
+    return FOBuscaLocal;
 }
 
 int main(int argc, char *argv[ ])
@@ -411,7 +428,7 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0, iter = 0;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.2;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.2, FOdeS, FOPerturbacao;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *solucaoUm;
@@ -471,15 +488,20 @@ int main(int argc, char *argv[ ])
                 for(i = 0; i < dados.qtdCidades; i++)
                 {
                     melhorSolucaoMulti[i] = dados.vetSolucaoStar[i];
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
                 }
             }
 
+            //ILS
+            FOdeS = FOStarMulti;
+
             while(iter < 10)
             {
-                perturbacao(solucaoUm);
-                FOStarMulti = ()
+                FOPerturbacao = perturbacao(dados);
+                FOStarMulti = doisOptBest(dados,FOPerturbacao);
+                FOStarMulti = criterioAceitacao(FOdeS,FOPerturbacao,FOStarMulti);
+                iter++;
             }
-
         }
 
         /*FOStarMulti = 0;
