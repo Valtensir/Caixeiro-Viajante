@@ -384,18 +384,27 @@ float orOptBest (Dados dados, float FOStar){
 
 int perturbacao(Dados dados)
 {
-    int num1, num2, aux, FOPerturbacao = 0;
+    int num1, num2, num3, num4, num5, num6, aux, FOPerturbacao = 0;
     srand(time(NULL));
 
     num1 = rand() % dados.qtdCidades;
-
-    do {
-        num2 = rand() % dados.qtdCidades;
-    } while(num1 == num2);
+    num2 = rand() % dados.qtdCidades;
+    num3 = rand() % dados.qtdCidades;
+    num4 = rand() % dados.qtdCidades;
+    num5 = rand() % dados.qtdCidades;
+    num6 = rand() % dados.qtdCidades;
 
     aux = dados.vetSolucaoStar[num1];
-    dados.vetSolucaoStar[num1] = dados.vetSolucaoStar[num2];
-    dados.vetSolucaoStar[num2] = aux;
+    dados.vetSolucaoStar[num1] = dados.vetSolucaoStar[num4];
+    dados.vetSolucaoStar[num4] = aux;
+
+    aux = dados.vetSolucaoStar[num2];
+    dados.vetSolucaoStar[num2] = dados.vetSolucaoStar[num6];
+    dados.vetSolucaoStar[num6] = aux;
+
+    aux = dados.vetSolucaoStar[num3];
+    dados.vetSolucaoStar[num3] = dados.vetSolucaoStar[num5];
+    dados.vetSolucaoStar[num5] = aux;
 
     for (int i = 0; i < dados.qtdCidades - 1; ++i)
     {
@@ -428,7 +437,7 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0, iter = 0;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.2, FOdeS, FOPerturbacao;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *solucaoUm;
@@ -493,7 +502,7 @@ int main(int argc, char *argv[ ])
             }
 
             //ILS
-            FOdeS = FOStarMulti;
+           FOdeS = FOStarMulti;
 
             while(iter < 10)
             {
