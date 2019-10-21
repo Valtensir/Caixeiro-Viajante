@@ -441,7 +441,6 @@ int main(int argc, char *argv[ ])
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *solucaoUm;
-    int *solucaoDois;
     int *selecionada;
     clock_t comeco, fim;
     double tempo;
@@ -466,7 +465,6 @@ int main(int argc, char *argv[ ])
         dados.vetSolucaoStar = (int *)malloc(dados.qtdCidades * sizeof(int));
         melhorSolucaoMulti = (int *)malloc(dados.qtdCidades * sizeof(int));
         solucaoUm = (int *)malloc(dados.qtdCidades * sizeof(int));
-        solucaoDois = (int *)malloc(dados.qtdCidades * sizeof(int));
         dados.distTotal = 0;
 
         // lê as coordenadas e preenche a matriz de distância entre as cidades
@@ -504,7 +502,7 @@ int main(int argc, char *argv[ ])
             //ILS
            FOdeS = FOStarMulti;
 
-            while(iter < 10)
+            while(iter < 100)
             {
                 FOPerturbacao = perturbacao(dados);
                 FOStarMulti = doisOptBest(dados,FOPerturbacao);
@@ -512,15 +510,6 @@ int main(int argc, char *argv[ ])
                 iter++;
             }
         }
-
-        /*FOStarMulti = 0;
-
-        for (int i = 0; i < dados.qtdCidades - 1; ++i)
-        {
-            FOStarMulti += dados.matrizDistancia[melhorSolucaoMulti[i]][melhorSolucaoMulti[i+1]];
-        }
-
-        FOStarMulti += dados.matrizDistancia[melhorSolucaoMulti[0]][melhorSolucaoMulti[dados.qtdCidades-1]];*/
        
         fim = clock();
         tempo = (double)(fim - inicio)/(double)CLOCKS_PER_SEC;
