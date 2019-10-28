@@ -437,7 +437,7 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0, iter = 0, buscaLocal;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND = 999999;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *solucaoUm;
@@ -577,7 +577,7 @@ int main(int argc, char *argv[ ])
                     break;
 
                 case 4:
-                
+
                     for (i = 0; i < dados.qtdCidades; i++)
                     {
                         solucaoUm[i] = dados.vetSolucaoStar[i];
