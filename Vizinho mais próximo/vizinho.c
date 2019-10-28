@@ -436,8 +436,8 @@ int main(int argc, char *argv[ ])
     FILE *arq;
     FILE *arq2;
     Dados dados;
-    int aux, inicio,  k, c = 0, iter = 0;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao;
+    int aux, inicio,  k, c = 0, iter = 0, buscaLocal;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
     int *solucaoUm;
@@ -499,7 +499,7 @@ int main(int argc, char *argv[ ])
                 }
             }
 
-            //ILS
+            /*//ILS
            FOdeS = FOStarMulti;
 
             while(iter < 100)
@@ -508,7 +508,98 @@ int main(int argc, char *argv[ ])
                 FOStarMulti = doisOptBest(dados,FOPerturbacao);
                 FOStarMulti = criterioAceitacao(FOdeS,FOPerturbacao,FOStarMulti);
                 iter++;
-            }
+            }*/
+
+            //VND
+            buscaLocal = 1;
+            while (buscaLocal <= 4)
+            {
+                switch (buscaLocal)
+                {
+                case 1:
+
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+                    }
+                    FOVND = doisOptFirst(dados,FOStarMulti);
+                    if (FOVND < FOStarMulti)
+                    {
+                        FOStarMulti = FOVND;
+                        buscaLocal = 1;
+                    } else {
+                        for (i = 0; i < dados.qtdCidades; i++)
+                        {
+                            dados.vetSolucaoStar[i] = solucaoUm[i];
+                        }
+                        buscaLocal++;
+                    }
+                    break;
+
+                case 2:
+
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+                    }
+                    FOVND = orOptFirst(dados,FOStarMulti);
+                    if (FOVND < FOStarMulti)
+                    {
+                        FOStarMulti = FOVND;
+                        buscaLocal = 1;
+                    } else {
+                        for (i = 0; i < dados.qtdCidades; i++)
+                        {
+                            dados.vetSolucaoStar[i] = solucaoUm[i];
+                        }
+                        buscaLocal++;
+                    }
+                    break;
+
+                case 3:
+
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+                    }
+                    FOVND = doisOptBest(dados,FOStarMulti);
+                    if (FOVND < FOStarMulti)
+                    {
+                        FOStarMulti = FOVND;
+                        buscaLocal = 1;
+                    } else {
+                        for (i = 0; i < dados.qtdCidades; i++)
+                        {
+                            dados.vetSolucaoStar[i] = solucaoUm[i];
+                        }
+                        buscaLocal++;
+                    }
+                    break;
+
+                case 4:
+                
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+                    }
+                    FOVND = orOptBest(dados,FOStarMulti);
+                    if (FOVND < FOStarMulti)
+                    {
+                        FOStarMulti = FOVND;
+                        buscaLocal = 1;
+                    } else {
+                        for (i = 0; i < dados.qtdCidades; i++)
+                        {
+                            dados.vetSolucaoStar[i] = solucaoUm[i];
+                        }
+                        buscaLocal++;
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }   
         }
        
         fim = clock();
