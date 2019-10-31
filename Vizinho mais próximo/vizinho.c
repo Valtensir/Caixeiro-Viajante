@@ -382,7 +382,7 @@ float orOptBest (Dados dados, float FOStar){
     return FOStar;
 }
 
-int perturbacao(Dados dados)
+int perturbacao1(Dados dados)
 {
     int num1, num2, num3, num4, num5, num6, aux, FOPerturbacao = 0;
     srand(time(NULL));
@@ -415,6 +415,26 @@ int perturbacao(Dados dados)
     return FOPerturbacao;
 }
 
+float perturbacao2(Dados dados){
+	int num1, num2, num3, num4, num5, num6, aux, FOPerturbacao = 0;
+    srand(time(NULL));
+
+    num1 = rand() % dados.qtdCidades;
+    num2 = rand() % dados.qtdCidades;
+    num3 = rand() % dados.qtdCidades;
+    num4 = rand() % dados.qtdCidades;
+    num5 = rand() % dados.qtdCidades;
+    num6 = rand() % dados.qtdCidades;
+	
+	
+	
+	
+	
+	
+	
+	return FOStar;
+}
+
 int criterioAceitacao(int FOdeS,int FOPerturbacao, int FOBuscaLocal)
 {
     if (FOdeS < FOBuscaLocal)
@@ -437,9 +457,10 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0, iter = 0, buscaLocal;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND = 999999;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND = 999999, FOVNS = 999999;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
+	bool melhora = false;
     int *solucaoUm;
     int *selecionada;
     clock_t comeco, fim;
@@ -504,12 +525,13 @@ int main(int argc, char *argv[ ])
 
             while(iter < 100)
             {
-                FOPerturbacao = perturbacao(dados);
+                FOPerturbacao = perturbacao1(dados);
                 FOStarMulti = doisOptBest(dados,FOPerturbacao);
                 FOStarMulti = criterioAceitacao(FOdeS,FOPerturbacao,FOStarMulti);
                 iter++;
             }*/
-
+			
+			/*
             //VND
             buscaLocal = 1;
             while (buscaLocal <= 4)
@@ -599,7 +621,81 @@ int main(int argc, char *argv[ ])
                 default:
                     break;
                 }
-            }   
+            }   */
+			
+			///VNS
+			buscaLocal = 1;
+			
+			while(buscaLocal <= 3){
+				switch(buscaLocal){
+					case 1:
+						iter = 0;
+						melhora = false;
+						for (i = 0; i < dados.qtdCidades; i++)
+						{
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+						}
+						while (iter < 10){
+							FOVNS = perturbacao1(dados);
+							FOVNS = doisOptBest(dados,FOVNS);
+						
+							if(FOVNS < FOStarMulti){
+								FOStarMulti = FOVNS;
+								melhora = true;
+								iter = 10;
+							} else {
+								for (i = 0; i < dados.qtdCidades; i++)
+								{
+									dados.vetSolucaoStar[i] = solucaoUm[i];
+								}
+							}
+						}
+						if(melhora){
+							buscaLocal = 1;
+						} else {
+							buscaLocal++;
+						}
+						break;
+						
+					case 2:
+						iter = 0;
+						melhora = false;
+						for (i = 0; i < dados.qtdCidades; i++)
+						{
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+						}
+						while (iter < 10){
+							FOVNS = perturbacao2(dados);
+							FOVNS = doisOptBest(dados,FOVNS);
+						
+							if(FOVNS < FOStarMulti){
+								FOStarMulti = FOVNS;
+								melhora = true;
+								iter = 10;
+							} else {
+								for (i = 0; i < dados.qtdCidades; i++)
+								{
+									dados.vetSolucaoStar[i] = solucaoUm[i];
+								}
+							}
+						}
+						if(melhora){
+							buscaLocal = 1;
+						} else {
+							buscaLocal++;
+						}
+						break;
+						
+					case 3:
+						buscaLocal++;
+						break;
+					
+					default:
+					
+						break;
+						
+				}
+			}
         }
        
         fim = clock();
