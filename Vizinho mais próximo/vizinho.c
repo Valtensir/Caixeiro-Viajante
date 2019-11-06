@@ -416,7 +416,8 @@ int perturbacao1(Dados dados)
 }
 
 float perturbacao2(Dados dados){
-	int num1, num2, num3, num4, num5, num6, aux, FOPerturbacao = 0;
+	int num1, num2, num3, num4, num5, num6, aux;
+    float FOPerturbacao = 0;
     srand(time(NULL));
 
     num1 = rand() % dados.qtdCidades;
@@ -426,13 +427,29 @@ float perturbacao2(Dados dados){
     num5 = rand() % dados.qtdCidades;
     num6 = rand() % dados.qtdCidades;
 	
-	
-	
-	
-	
-	
-	
-	return FOStar;
+    aux = dados.vetSolucaoStar[num6];
+    dados.vetSolucaoStar[num6] = dados.vetSolucaoStar[num5];
+    dados.vetSolucaoStar[num5] = dados.vetSolucaoStar[num4];
+    dados.vetSolucaoStar[num4] = dados.vetSolucaoStar[num3];
+    dados.vetSolucaoStar[num3] = dados.vetSolucaoStar[num2];
+    dados.vetSolucaoStar[num2] = dados.vetSolucaoStar[num1];
+    dados.vetSolucaoStar[num1] = aux;
+
+    for (int i = 0; i < dados.qtdCidades - 1; ++i)
+    {
+        FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[i]][dados.vetSolucaoStar[i+1]];
+    }
+    FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[0]][dados.vetSolucaoStar[dados.qtdCidades-1]];
+
+    return FOPerturbacao;
+}
+
+float pertubacao3(Dados dados){
+    float FOPerturbacao = 0;
+
+    
+
+    return FOPerturbacao;
 }
 
 int criterioAceitacao(int FOdeS,int FOPerturbacao, int FOBuscaLocal)
@@ -687,7 +704,32 @@ int main(int argc, char *argv[ ])
 						break;
 						
 					case 3:
-						buscaLocal++;
+						iter = 0;
+						melhora = false;
+						for (i = 0; i < dados.qtdCidades; i++)
+						{
+                        solucaoUm[i] = dados.vetSolucaoStar[i];
+						}
+						while (iter < 10){
+							FOVNS = perturbacao3(dados);
+							FOVNS = doisOptBest(dados,FOVNS);
+						
+							if(FOVNS < FOStarMulti){
+								FOStarMulti = FOVNS;
+								melhora = true;
+								iter = 10;
+							} else {
+								for (i = 0; i < dados.qtdCidades; i++)
+								{
+									dados.vetSolucaoStar[i] = solucaoUm[i];
+								}
+							}
+						}
+						if(melhora){
+							buscaLocal = 1;
+						} else {
+							buscaLocal++;
+						}
 						break;
 					
 					default:
