@@ -382,6 +382,101 @@ float orOptBest (Dados dados, float FOStar){
     return FOStar;
 }
 
+float VND(Dados dados, float FOStarMulti, int* solucaoUm)
+{
+    int buscaLocal = 1;
+    float FOVND = 999999;
+    while (buscaLocal <= 4)
+    {
+        switch (buscaLocal)
+        {
+            case 1:
+
+                for (i = 0; i < dados.qtdCidades; i++)
+                {
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+                }
+                FOVND = doisOptFirst(dados,FOStarMulti);
+                if (FOVND < FOStarMulti)
+                {
+                    FOStarMulti = FOVND;
+                    buscaLocal = 1;
+                } else {
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        dados.vetSolucaoStar[i] = solucaoUm[i];
+                    }
+                    buscaLocal++;
+                }
+                break;
+
+            case 2:
+
+                for (i = 0; i < dados.qtdCidades; i++)
+                {
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+                }
+                FOVND = orOptFirst(dados,FOStarMulti);
+                if (FOVND < FOStarMulti)
+                {
+                    FOStarMulti = FOVND;
+                    buscaLocal = 1;
+                } else {
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        dados.vetSolucaoStar[i] = solucaoUm[i];
+                    }
+                    buscaLocal++;
+                }
+                break;
+
+            case 3:
+
+                for (i = 0; i < dados.qtdCidades; i++)
+                {
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+                }
+                FOVND = doisOptBest(dados,FOStarMulti);
+                if (FOVND < FOStarMulti)
+                {
+                    FOStarMulti = FOVND;
+                    buscaLocal = 1;
+                } else {
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        dados.vetSolucaoStar[i] = solucaoUm[i];
+                    }
+                    buscaLocal++;
+                }
+                break;
+
+            case 4:
+
+                for (i = 0; i < dados.qtdCidades; i++)
+                {
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+                }
+                FOVND = orOptBest(dados,FOStarMulti);
+                if (FOVND < FOStarMulti)
+                {
+                    FOStarMulti = FOVND;
+                    buscaLocal = 1;
+                } else {
+                    for (i = 0; i < dados.qtdCidades; i++)
+                    {
+                        dados.vetSolucaoStar[i] = solucaoUm[i];
+                    }
+                    buscaLocal++;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }  
+    return FOStarMulti;
+}
+
 int perturbacao1(Dados dados)
 {
     int num1, num2, num3, num4, num5, num6, aux, FOPerturbacao = 0;
@@ -444,12 +539,143 @@ float perturbacao2(Dados dados){
     return FOPerturbacao;
 }
 
-float pertubacao3(Dados dados){
+float perturbacao3(Dados dados){
+    int num1, num2, num3, num4, num5, num6, aux;
     float FOPerturbacao = 0;
+    srand(time(NULL));
 
-    
+    num1 = rand() % dados.qtdCidades;
+    num2 = rand() % dados.qtdCidades;
+    num3 = rand() % dados.qtdCidades;
+    num4 = rand() % dados.qtdCidades;
+    num5 = rand() % dados.qtdCidades;
+    num6 = rand() % dados.qtdCidades;
+
+    aux = dados.vetSolucaoStar[num1];
+    dados.vetSolucaoStar[num1] = dados.vetSolucaoStar[num2];
+    dados.vetSolucaoStar[num2] = dados.vetSolucaoStar[num3];
+    dados.vetSolucaoStar[num3] = dados.vetSolucaoStar[num4];
+    dados.vetSolucaoStar[num4] = dados.vetSolucaoStar[num5];
+    dados.vetSolucaoStar[num5] = dados.vetSolucaoStar[num6];
+    dados.vetSolucaoStar[num6] = aux;
+
+    for (int i = 0; i < dados.qtdCidades - 1; ++i)
+    {
+        FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[i]][dados.vetSolucaoStar[i+1]];
+    }
+    FOPerturbacao += dados.matrizDistancia[dados.vetSolucaoStar[0]][dados.vetSolucaoStar[dados.qtdCidades-1]];
 
     return FOPerturbacao;
+}
+
+float VNS(Dados dados, float FOStarMulti, int* solucaoUm){
+    int buscaLocal = 1;
+	int melhora = 0, iter = 0;		
+    float FOVNS = 9999999;
+
+	while(buscaLocal <= 3){
+	    switch(buscaLocal){
+
+			case 1:
+				iter = 0;
+				melhora = 0;
+				for (i = 0; i < dados.qtdCidades; i++)
+				{
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+				}
+				while (iter < 10){
+					FOVNS = perturbacao1(dados);
+					FOVNS = VND(dados,FOVNS,solucaoUm);
+						
+					if(FOVNS < FOStarMulti){
+						FOStarMulti = FOVNS;
+						melhora = 1;
+						iter = 10;
+					} else {
+						for (i = 0; i < dados.qtdCidades; i++)
+						{
+							dados.vetSolucaoStar[i] = solucaoUm[i];
+						}
+                        iter++;
+					}   
+				}
+				if(melhora == 1){
+					buscaLocal = 1;
+				} else {
+					buscaLocal++;
+				}
+				break;
+						
+			case 2:
+				iter = 0;
+				melhora = 0;
+				for (i = 0; i < dados.qtdCidades; i++)
+				{
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+				}
+				while (iter < 10){
+					FOVNS = perturbacao2(dados);
+					FOVNS = VND(dados,FOVNS,solucaoUm);
+						
+				    if(FOVNS < FOStarMulti)
+                    {
+					    FOStarMulti = FOVNS;
+					    melhora = 1;
+					    iter = 10;
+				    } else {
+					    for (i = 0; i < dados.qtdCidades; i++)
+					    {
+						    dados.vetSolucaoStar[i] = solucaoUm[i];
+					    }
+                        iter++;
+				    }
+			    }
+				if(melhora == 1)
+                {
+					buscaLocal = 1;
+				} else {
+					buscaLocal++;
+				}
+				break;
+						
+			case 3:
+				iter = 0;
+			    melhora = 0;
+				for (i = 0; i < dados.qtdCidades; i++)
+				{
+                    solucaoUm[i] = dados.vetSolucaoStar[i];
+				}
+				while (iter < 10)
+                {
+					FOVNS = perturbacao3(dados);
+					FOVNS = VND(dados,FOVNS,solucaoUm);
+						
+					if(FOVNS < FOStarMulti){
+						FOStarMulti = FOVNS;
+						melhora = 1;
+						iter = 10;
+					} else {
+						for (i = 0; i < dados.qtdCidades; i++)
+						{
+							dados.vetSolucaoStar[i] = solucaoUm[i];
+						}
+                        iter++;
+					}
+				}
+				if(melhora == 1){
+					buscaLocal = 1;
+				} else {
+					buscaLocal++;
+				}
+				break;
+					
+			default:
+                buscaLocal++;
+				break;
+						
+		}
+	}
+    return FOVNS;
 }
 
 int criterioAceitacao(int FOdeS,int FOPerturbacao, int FOBuscaLocal)
@@ -474,10 +700,9 @@ int main(int argc, char *argv[ ])
     FILE *arq2;
     Dados dados;
     int aux, inicio,  k, c = 0, iter = 0, buscaLocal;
-    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao, FOVND = 999999, FOVNS = 999999;
+    float distancia, FOStar = 99999999, solucaoOtima,x, y, FOStarMulti = 9999999, alfa = 0.1, FOdeS, FOPerturbacao;
     int *melhorSolucaoMulti;
     int **matrizCoordenadas;
-	bool melhora = false;
     int *solucaoUm;
     int *selecionada;
     clock_t comeco, fim;
@@ -525,7 +750,6 @@ int main(int argc, char *argv[ ])
             FOStar += dados.matrizDistancia[dados.vetSolucaoStar[0]][dados.vetSolucaoStar[dados.qtdCidades-1]];
 
             FOStar = doisOptBest(dados,FOStar);
-            //FOStar = orOptBest(dados,FOStar);
 
             if(FOStar < FOStarMulti)
             {
@@ -547,197 +771,12 @@ int main(int argc, char *argv[ ])
                 FOStarMulti = criterioAceitacao(FOdeS,FOPerturbacao,FOStarMulti);
                 iter++;
             }*/
-			
-			/*
-            //VND
-            buscaLocal = 1;
-            while (buscaLocal <= 4)
-            {
-                switch (buscaLocal)
-                {
-                case 1:
 
-                    for (i = 0; i < dados.qtdCidades; i++)
-                    {
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-                    }
-                    FOVND = doisOptFirst(dados,FOStarMulti);
-                    if (FOVND < FOStarMulti)
-                    {
-                        FOStarMulti = FOVND;
-                        buscaLocal = 1;
-                    } else {
-                        for (i = 0; i < dados.qtdCidades; i++)
-                        {
-                            dados.vetSolucaoStar[i] = solucaoUm[i];
-                        }
-                        buscaLocal++;
-                    }
-                    break;
-
-                case 2:
-
-                    for (i = 0; i < dados.qtdCidades; i++)
-                    {
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-                    }
-                    FOVND = orOptFirst(dados,FOStarMulti);
-                    if (FOVND < FOStarMulti)
-                    {
-                        FOStarMulti = FOVND;
-                        buscaLocal = 1;
-                    } else {
-                        for (i = 0; i < dados.qtdCidades; i++)
-                        {
-                            dados.vetSolucaoStar[i] = solucaoUm[i];
-                        }
-                        buscaLocal++;
-                    }
-                    break;
-
-                case 3:
-
-                    for (i = 0; i < dados.qtdCidades; i++)
-                    {
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-                    }
-                    FOVND = doisOptBest(dados,FOStarMulti);
-                    if (FOVND < FOStarMulti)
-                    {
-                        FOStarMulti = FOVND;
-                        buscaLocal = 1;
-                    } else {
-                        for (i = 0; i < dados.qtdCidades; i++)
-                        {
-                            dados.vetSolucaoStar[i] = solucaoUm[i];
-                        }
-                        buscaLocal++;
-                    }
-                    break;
-
-                case 4:
-
-                    for (i = 0; i < dados.qtdCidades; i++)
-                    {
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-                    }
-                    FOVND = orOptBest(dados,FOStarMulti);
-                    if (FOVND < FOStarMulti)
-                    {
-                        FOStarMulti = FOVND;
-                        buscaLocal = 1;
-                    } else {
-                        for (i = 0; i < dados.qtdCidades; i++)
-                        {
-                            dados.vetSolucaoStar[i] = solucaoUm[i];
-                        }
-                        buscaLocal++;
-                    }
-                    break;
-
-                default:
-                    break;
-                }
-            }   */
+            //FOStarMulti = VND(dados,FOStarMulti,solucaoUm);
 			
 			///VNS
-			buscaLocal = 1;
+            FOStarMulti = VNS(dados,FOStarMulti,solucaoUm);
 			
-			while(buscaLocal <= 3){
-				switch(buscaLocal){
-					case 1:
-						iter = 0;
-						melhora = false;
-						for (i = 0; i < dados.qtdCidades; i++)
-						{
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-						}
-						while (iter < 10){
-							FOVNS = perturbacao1(dados);
-							FOVNS = doisOptBest(dados,FOVNS);
-						
-							if(FOVNS < FOStarMulti){
-								FOStarMulti = FOVNS;
-								melhora = true;
-								iter = 10;
-							} else {
-								for (i = 0; i < dados.qtdCidades; i++)
-								{
-									dados.vetSolucaoStar[i] = solucaoUm[i];
-								}
-							}
-						}
-						if(melhora){
-							buscaLocal = 1;
-						} else {
-							buscaLocal++;
-						}
-						break;
-						
-					case 2:
-						iter = 0;
-						melhora = false;
-						for (i = 0; i < dados.qtdCidades; i++)
-						{
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-						}
-						while (iter < 10){
-							FOVNS = perturbacao2(dados);
-							FOVNS = doisOptBest(dados,FOVNS);
-						
-							if(FOVNS < FOStarMulti){
-								FOStarMulti = FOVNS;
-								melhora = true;
-								iter = 10;
-							} else {
-								for (i = 0; i < dados.qtdCidades; i++)
-								{
-									dados.vetSolucaoStar[i] = solucaoUm[i];
-								}
-							}
-						}
-						if(melhora){
-							buscaLocal = 1;
-						} else {
-							buscaLocal++;
-						}
-						break;
-						
-					case 3:
-						iter = 0;
-						melhora = false;
-						for (i = 0; i < dados.qtdCidades; i++)
-						{
-                        solucaoUm[i] = dados.vetSolucaoStar[i];
-						}
-						while (iter < 10){
-							FOVNS = perturbacao3(dados);
-							FOVNS = doisOptBest(dados,FOVNS);
-						
-							if(FOVNS < FOStarMulti){
-								FOStarMulti = FOVNS;
-								melhora = true;
-								iter = 10;
-							} else {
-								for (i = 0; i < dados.qtdCidades; i++)
-								{
-									dados.vetSolucaoStar[i] = solucaoUm[i];
-								}
-							}
-						}
-						if(melhora){
-							buscaLocal = 1;
-						} else {
-							buscaLocal++;
-						}
-						break;
-					
-					default:
-					
-						break;
-						
-				}
-			}
         }
        
         fim = clock();
